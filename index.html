@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>幼儿教师周工作台</title>
+<style>
+  :root{
+    --bg:#FFF8EF; --card:#FFFFFF; --ink:#4A4036; --muted:#8A8076;
+    --yellow:#FFE7A8; --mint:#CDEFD9; --pink:#FFD6E3; --blue:#CFE6FF;
+    --line:#F0E6D6; --primary:#F2A65A; --primary-d:#E08C3C;
+    --shadow:0 4px 16px rgba(180,150,110,.15);
+    --radius:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.6}
+  .topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:8px;padding:10px 16px;background:rgba(255,255,255,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);box-shadow:0 2px 10px rgba(0,0,0,.04)}
+  .topbar .logo{font-size:18px;font-weight:700;color:var(--primary-d)}
+  .topbar .spacer{flex:1}
+  .btn{border:none;border-radius:10px;padding:8px 14px;font-size:13.5px;cursor:pointer;background:#EEF3EE;color:#3f6b4a;font-weight:600;transition:.15s}
+  .btn:hover{filter:brightness(.97);transform:translateY(-1px)}
+  .btn.primary{background:linear-gradient(135deg,#F6B36A,#E08C3C);color:#fff;box-shadow:0 4px 12px rgba(224,140,60,.28)}
+  .btn.ghost{background:#fff;color:var(--muted);border:1px solid var(--line)}
+  .btn.danger{background:#FFE3E3;color:#c0392b}
+  .btn.sm{padding:5px 11px;font-size:12.5px;border-radius:9px}
+  .layout{display:flex;min-height:calc(100vh - 56px)}
+  .sidebar{width:208px;flex-shrink:0;background:#fff;border-right:1px solid var(--line);padding:12px 8px;position:sticky;top:56px;height:calc(100vh - 56px);overflow:auto}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;margin:3px 4px;cursor:pointer;color:var(--ink);font-weight:600;font-size:14px}
+  .nav-item .ic{font-size:18px;width:22px;text-align:center}
+  .nav-item:hover{background:var(--bg)}
+  .nav-item.active{background:linear-gradient(135deg,#FFE7A8,#FFD9B0);color:#8a5a16;box-shadow:0 3px 8px rgba(224,140,60,.18)}
+  .main{flex:1;padding:18px 20px 60px;max-width:1100px;margin:0 auto;width:100%}
+  .page-title{font-size:20px;font-weight:700;margin:4px 0 16px;display:flex;align-items:center;gap:8px}
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 20px;margin-bottom:16px;border:1px solid var(--line)}
+  .grid{display:grid;gap:14px}
+  .cols-2{grid-template-columns:repeat(2,1fr)}
+  .cols-3{grid-template-columns:repeat(3,1fr)}
+  .cols-4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:860px){.sidebar{display:none}.cols-2,.cols-3,.cols-4{grid-template-columns:1fr}}
+  .mod-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;cursor:pointer;border:2px solid transparent;transition:.18s;display:flex;flex-direction:column;gap:8px;min-height:130px;position:relative}
+  .mod-card:hover{border-color:var(--yellow);transform:translateY(-3px);box-shadow:0 12px 28px rgba(224,140,60,.18)}
+  .mod-card .ic{font-size:24px;width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:var(--bg);border:1px solid var(--line)}
+  .mod-card .t{font-weight:700;font-size:16px;color:var(--ink)}
+  .mod-card .d{font-size:12.5px;color:var(--muted);line-height:1.45}
+  .mod-card .badge{margin-top:auto;align-self:flex-start;font-size:11.5px;background:var(--mint);color:#2f6b46;padding:2px 10px;border-radius:20px;font-weight:600}
+  label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px;font-weight:600}
+  input,select,textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:14px;font-family:inherit;background:#fffefb;color:var(--ink)}
+  textarea{resize:vertical;min-height:80px}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary)}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .row>*{flex:1;min-width:120px}
+  .list-item{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--primary);border-radius:12px;padding:13px 15px;margin-bottom:10px;transition:.15s}
+  .list-item:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
+  .list-item .hd{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .list-item .tt{font-weight:700;font-size:14.5px}
+  .list-item .meta{font-size:12px;color:var(--muted);margin-top:3px}
+  .tag{display:inline-block;background:var(--blue);color:#2a5b8a;font-size:11px;padding:1px 8px;border-radius:20px;margin:2px 3px 0 0}
+  .pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
+  .pill.ok{background:var(--mint);color:#2f6b46}
+  .pill.warn{background:var(--yellow);color:#8a5a16}
+  .pill.bad{background:#FFE0E0;color:#c0392b}
+  .pill.late{background:var(--pink);color:#b03a6e}
+  .att-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+  .att-cell{border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center}
+  .att-cell .nm{font-weight:600;font-size:13px;margin-bottom:6px}
+  .att-btns{display:flex;gap:4px;justify-content:center}
+  .att-btns button{flex:1;font-size:11px;padding:4px 0;border-radius:7px;border:none;cursor:pointer;background:#f3ece0;color:var(--muted)}
+  .att-btns button.on-ok{background:var(--mint);color:#2f6b46}
+  .att-btns button.on-late{background:var(--pink);color:#b03a6e}
+  .att-btns button.on-bad{background:#FFE0E0;color:#c0392b}
+  .modal-bg{position:fixed;inset:0;background:rgba(60,50,40,.35);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+  .modal-bg.show{display:flex}
+  .modal{background:#fff;border-radius:18px;padding:22px;max-width:560px;width:100%;max-height:86vh;overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.2)}
+  .modal h3{margin:0 0 12px}
+  .tip{font-size:12px;color:var(--muted);background:var(--bg);border-radius:10px;padding:8px 10px;margin-top:6px}
+  .stat{background:var(--card);border-radius:14px;box-shadow:var(--shadow);padding:16px 12px;text-align:center;border:1px solid var(--line)}
+  .stat .si{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;margin:0 auto 9px}
+  .stat .n{font-size:25px;font-weight:800;color:var(--primary-d);line-height:1.1}
+  .stat .l{font-size:12px;color:var(--muted);margin-top:7px}
+  .empty{color:var(--muted);text-align:center;padding:20px;font-size:13px}
+  .copy-ok{color:#2f6b46;font-size:12px;margin-left:8px}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#4A4036;color:#fff;padding:10px 18px;border-radius:24px;font-size:14px;z-index:99;opacity:0;transition:.25s;pointer-events:none}
+  .toast.show{opacity:1}
+  .sec-title{font-weight:700;margin:18px 0 9px;color:var(--primary-d);font-size:15px;display:flex;align-items:center;gap:8px;padding-left:11px;border-left:4px solid var(--primary)}
+  .page-header{margin:2px 0 18px}
+  .ph-title{font-size:22px;font-weight:800;display:flex;align-items:center;gap:10px;color:var(--ink)}
+  .ph-sub{margin-top:7px;font-size:13px;color:var(--muted);line-height:1.55;max-width:820px}
+  .home-banner{background:linear-gradient(120deg,#FFE9C7 0%,#FFD9E6 55%,#D8ECFF 100%);border-radius:20px;padding:22px 24px;margin-bottom:18px;box-shadow:var(--shadow)}
+  .home-banner .hb-hello{font-size:25px;font-weight:800;color:#7a4a16;letter-spacing:.5px}
+  .home-banner .hb-date{margin-top:5px;font-size:13px;color:#8a6a3a}
+  .home-banner .hb-theme{margin-top:13px;display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.6);border-radius:999px;padding:7px 15px;font-size:13px;font-weight:600;color:#7a4a16}
+  .exp-tip{font-size:12px;color:var(--muted);background:var(--blue);border-radius:10px;padding:8px 10px;margin:6px 0 0}
+  @media print{
+    @page{margin:14mm}
+    .topbar,.sidebar,.modal-bg,.toast{display:none!important}
+    .layout{display:block}
+    .main{max-width:none;padding:0;margin:0}
+    .btn,.att-btns{display:none!important}
+    .card{box-shadow:none;border:1px solid #bbb;break-inside:avoid;margin-bottom:12px;padding:14px}
+    .page-header{margin:0 0 14px}
+    .ph-sub{display:none}
+    .ph-title{font-size:22px}
+    .mod-card{border:1px solid #eee}
+    .sec-title{color:#8a5a16;border-left-color:#8a5a16}
+    .list-item{border-left:3px solid #8a5a16}
+    .home-banner{box-shadow:none;border:1px solid #ccc;background:#fff!important}
+    .obp{width:3.5cm!important;height:4.9cm!important;max-width:none!important}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    body.print-week .layout{display:none!important}
+    body.print-week .print-area{display:block!important}
+  }
+  .print-area{display:none}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo">幼儿教师周工作台</div>
+  <div class="spacer"></div>
+  <button class="btn ghost sm" id="btnWord">本页Word</button>
+  <button class="btn ghost sm" id="btnCsv">本页表格</button>
+  <button class="btn ghost sm" id="btnPrint">预览打印</button>
+  <button class="btn ghost sm" id="btnBackup">数据备份</button>
+  <button class="btn sm" id="btnTheme">本周主题</button>
+</div>
+<div class="layout">
+  <div class="sidebar" id="sidebar"></div>
+  <div class="main" id="app"></div>
+</div>
+
+<div class="modal-bg" id="modalBg"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+<div id="printArea" class="print-area"></div>
+
+<script>
+/* ============ 数据层 ============ */
+var DB_KEY='yt_workbench_v1';
+var NAV=[
+  {id:'home',ic:'🏠',t:'首页'},
+  {id:'schedule',ic:'📅',t:'今日一日流程'},
+  {id:'attendance',ic:'✅',t:'班级出勤'},
+  {id:'todo',ic:'📝',t:'今日待办'},
+  {id:'observation',ic:'🔍',t:'幼儿观察记录'},
+  {id:'comm',ic:'💬',t:'家园沟通'},
+  {id:'material',ic:'📚',t:'教案素材'},
+  {id:'lesson',ic:'🤖',t:'AI备课助手'},
+  {id:'weekly',ic:'🌟',t:'本周主题'}
+];
+function $(s,r){return (r||document).querySelector(s)}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function fmt(d){return d instanceof Date?d.toISOString().slice(0,10):d}
+function today(){return fmt(new Date())}
+function load(){try{return JSON.parse(localStorage.getItem(DB_KEY))}catch(e){return null}}
+function save(){localStorage.setItem(DB_KEY,JSON.stringify(state))}
+function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('show')},1600)}
+function pageHeader(title,sub){return '<div class="page-header"><div class="ph-title">'+title+'</div>'+(sub?'<div class="ph-sub">'+sub+'</div>':'')+'</div>'}
+
+function defaultState(){
+  var roster=[];for(var i=1;i<=30;i++)roster.push({id:uid(),name:'幼儿'+('0'+i).slice(-2)});
+  var schedule=[
+    {time:'07:40-08:10',act:'入园晨检与自由活动',note:''},
+    {time:'08:10-08:40',act:'早餐',note:''},
+    {time:'08:40-09:10',act:'晨间锻炼 / 户外',note:''},
+    {time:'09:10-09:40',act:'集体教学活动',note:''},
+    {time:'09:40-10:10',act:'点心 / 如厕盥洗',note:''},
+    {time:'10:10-11:00',act:'区域活动',note:''},
+    {time:'11:00-11:30',act:'户外游戏',note:''},
+    {time:'11:30-12:00',act:'午餐',note:''},
+    {time:'12:00-14:30',act:'午睡',note:''},
+    {time:'14:30-15:00',act:'起床 / 午点',note:''},
+    {time:'15:00-15:40',act:'游戏 / 特色活动',note:''},
+    {time:'15:40-16:10',act:'离园准备',note:''},
+    {time:'16:10-17:00',act:'错峰离园',note:''}
+  ];
+  return {
+    roster:roster, schedule:schedule,
+    attendance:{},
+    todos:[
+      {id:uid(),text:'提醒家长带被褥清洗',done:false,date:today(),pri:'中'},
+      {id:uid(),text:'完成周计划表',done:false,date:today(),pri:'高'}
+    ],
+    observations:[],
+    comms:[],
+    materials:[],
+    lessons:[],
+    weekly:{title:'我的身体',desc:'认识身体部位，学习自我保护与健康管理。',start:today(),end:'',goals:['知道主要身体部位名称','养成勤洗手好习惯','乐意参与体育游戏']}
+  };
+}
+var state=load()||defaultState();save();
+
+/* ============ 路由 ============ */
+function renderSidebar(){
+  $('#sidebar').innerHTML=NAV.map(function(n){return '<div class="nav-item" data-go="'+n.id+'"><span class="ic">'+n.ic+'</span><span>'+n.t+'</span></div>'}).join('');
+  var items=$('#sidebar').querySelectorAll('[data-go]');
+  for(var i=0;i<items.length;i++){items[i].onclick=function(){location.hash='#'+this.dataset.go}}
+}
+function route(){
+  var h=location.hash.replace('#','')||'home';
+  renderSidebar();
+  var navs=document.querySelectorAll('.nav-item');
+  for(var i=0;i<navs.length;i++){navs[i].classList.toggle('active',navs[i].dataset.go===h)}
+  var map={home:viewHome,schedule:viewSchedule,attendance:viewAttendance,todo:viewTodo,observation:viewObservation,comm:viewComm,material:viewMaterial,lesson:viewLesson,weekly:viewWeekly};
+  (map[h]||viewHome)();
+}
+window.addEventListener('hashchange',route);
+
+/* ============ 首页 ============ */
+function greet(){var h=new Date().getHours();return h<11?'早上好':h<14?'中午好':h<18?'下午好':'晚上好'}
+function monday(){var d=new Date();var day=(d.getDay()+6)%7;d.setDate(d.getDate()-day);return fmt(d)}
+function viewHome(){
+  var t=today();
+  var undone=state.todos.filter(function(x){return !x.done&&x.date<=t}).length;
+  var att=state.attendance[t];
+  var okCount=att?att.ok.length:0;
+  var lateCount=att?att.late.length:0;
+  var badCount=att?Object.keys(att.bad).length:0;
+  var obsWeek=state.observations.filter(function(o){return o.date>=monday()}).length;
+  var app=$('#app');
+  app.innerHTML='<div class="home-banner">'
+    +'<div class="hb-hello">'+greet()+'！老师</div>'
+    +'<div class="hb-date">今天是 '+t+'　·　愿今天的工作顺心顺利 🌿</div>'
+    +'<div class="hb-theme">🌟 本周主题：'+esc(state.weekly.title)+'</div>'
+    +'</div>'
+    +'<div class="grid cols-4" style="margin-bottom:18px">'
+    +'<div class="stat"><div class="si" style="background:#FFE9C7">📝</div><div class="n">'+undone+'</div><div class="l">未完成待办</div></div>'
+    +'<div class="stat"><div class="si" style="background:#D6F0E0">✅</div><div class="n">'+okCount+'/'+state.roster.length+'</div><div class="l">今日出勤</div></div>'
+    +'<div class="stat"><div class="si" style="background:#D6E8FF">🔍</div><div class="n">'+obsWeek+'</div><div class="l">本周观察</div></div>'
+    +'<div class="stat"><div class="si" style="background:#FFD9E6">🌟</div><div class="n" style="font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+esc(state.weekly.title)+'">'+esc(state.weekly.title)+'</div><div class="l">本周主题</div></div>'
+    +'</div>'
+    +pageHeader('🧭 功能导航','点击下面的模块即可进入对应功能；每个模块都支持新增、修改、保存，数据自动保存在本机。')
+    +'<div class="grid cols-3" id="modGrid"></div>';
+  var mods=NAV.filter(function(n){return n.id!=='home'});
+  var counts={schedule:state.schedule.length,attendance:okCount,todo:state.todos.length,observation:state.observations.length,comm:state.comms.length,material:state.materials.length,lesson:state.lessons.length,weekly:1};
+  var descs={schedule:'查看 / 编辑一日活动时间轴',attendance:'打卡全班幼儿出勤',todo:'待办增改与完成',observation:'照片+关键词→观察笔记',comm:'事项到温和专业回复',material:'收集可复用教案素材',lesson:'年龄段+主题→完整教案',weekly:'本周主题与总目标'};
+  $('#modGrid').innerHTML=mods.map(function(n){return '<div class="mod-card" data-go="'+n.id+'"><div class="ic">'+n.ic+'</div><div class="t">'+n.t+'</div><div class="d">'+descs[n.id]+'</div><div class="badge">'+counts[n.id]+' 条</div></div>'}).join('');
+  var cells=$('#modGrid').querySelectorAll('[data-go]');
+  for(var i=0;i<cells.length;i++){cells[i].onclick=function(){location.hash='#'+this.dataset.go}}
+}
+
+/* ============ 今日一日流程 ============ */
+function viewSchedule(){
+  $('#app').innerHTML=pageHeader('📅 今日一日流程','编辑与管理班级一日活动流程，可新增、排序、删除环节，也可一键恢复默认。')
+    +'<div class="card"><div class="row"><button class="btn primary" id="addSch">＋ 新增环节</button><button class="btn ghost" id="resetSch">恢复默认流程</button></div><div id="schList"></div></div>';
+  function draw(){
+    $('#schList').innerHTML=state.schedule.map(function(s,i){
+      return '<div class="list-item"><div class="hd"><div class="tt">'+s.time+'</div><div>'
+        +'<button class="btn ghost sm" onclick="upSch('+i+')">↑</button> '
+        +'<button class="btn ghost sm" onclick="downSch('+i+')">↓</button> '
+        +'<button class="btn danger sm" onclick="delSch('+i+')">删</button></div></div>'
+        +'<input value="'+esc(s.act)+'" onchange="editSch('+i+',\'act\',this.value)" placeholder="环节名称" style="margin-top:8px">'
+        +'<input value="'+esc(s.note)+'" onchange="editSch('+i+',\'note\',this.value)" placeholder="备注（可选）" style="margin-top:6px"></div>';
+    }).join('');
+  }
+  draw();
+  $('#addSch').onclick=function(){state.schedule.push({time:'--:--',act:'新环节',note:''});save();draw()};
+  $('#resetSch').onclick=function(){if(confirm('恢复为默认大班一日流程？当前修改将丢失。')){state.schedule=defaultState().schedule;save();draw();toast('已恢复默认')}};
+  window.editSch=function(i,k,v){state.schedule[i][k]=v;save()};
+  window.delSch=function(i){state.schedule.splice(i,1);save();draw()};
+  window.upSch=function(i){if(i>0){var tmp=state.schedule[i-1];state.schedule[i-1]=state.schedule[i];state.schedule[i]=tmp;save();draw()}};
+  window.downSch=function(i){if(i<state.schedule.length-1){var tmp=state.schedule[i+1];state.schedule[i+1]=state.schedule[i];state.schedule[i]=tmp;save();draw()}};
+}
+
+/* ============ 班级出勤 ============ */
+function viewAttendance(){
+  var t=today();
+  $('#app').innerHTML=pageHeader('✅ 班级出勤（共 '+state.roster.length+' 人）','每日为全班幼儿打卡出勤 / 迟到 / 请假，支持批量导入名单与按周汇总打印。')
+    +'<div class="card"><div class="row">'
+    +'<div><label>日期</label><input type="date" id="attDate" value="'+t+'"></div>'
+    +'<div style="flex:0 0 auto"><label>&nbsp;</label><button class="btn" id="manageRoster">编辑名单</button></div>'
+    +'<div style="flex:0 0 auto"><label>&nbsp;</label><button class="btn ghost" id="allOk">全员出勤</button></div>'
+    +'<div style="flex:0 0 auto"><label>&nbsp;</label><button class="btn ghost" id="batchRoster">批量导入名单</button></div>'
+    +'<div style="flex:0 0 auto"><label>&nbsp;</label><button class="btn ghost" id="weeklyPrint">按周打印</button></div>'
+    +'<div style="flex:0 0 auto"><label>&nbsp;</label><button class="btn ghost" id="weeklyWord">按周Word</button></div></div>'
+    +'<div id="attStat" style="margin:10px 0"></div>'
+    +'<div class="att-grid" id="attGrid"></div>'
+    +'<div class="tip">出勤=绿 · 迟到=粉 · 请假=红（红框可填原因）。数据自动保存在本机。</div></div>';
+  function getAtt(d){if(!state.attendance[d])state.attendance[d]={ok:[],late:[],bad:{}};return state.attendance[d]}
+  function draw(){
+    var d=$('#attDate').value;var a=getAtt(d);
+    var okS={},lateS={},badS={};
+    a.ok.forEach(function(x){okS[x]=1});a.late.forEach(function(x){lateS[x]=1});Object.keys(a.bad).forEach(function(x){badS[x]=1});
+    var stat='<span class="pill ok">出勤 '+a.ok.length+'</span> <span class="pill late">迟到 '+a.late.length+'</span> <span class="pill bad">请假 '+Object.keys(a.bad).length+'</span> <span class="pill warn">未打卡 '+(state.roster.length-a.ok.length-a.late.length-Object.keys(a.bad).length)+'</span>';
+    $('#attStat').innerHTML=stat;
+    $('#attGrid').innerHTML=state.roster.map(function(r){
+      var st=okS[r.id]?'ok':lateS[r.id]?'late':badS[r.id]?'bad':'';
+      return '<div class="att-cell"><div class="nm">'+esc(r.name)+'</div><div class="att-btns">'
+        +'<button class="'+(st==='ok'?'on-ok':'')+'" onclick="setAtt(\''+d+'\',\''+r.id+'\',\'ok\')">出勤</button>'
+        +'<button class="'+(st==='late'?'on-late':'')+'" onclick="setAtt(\''+d+'\',\''+r.id+'\',\'late\')">迟</button>'
+        +'<button class="'+(st==='bad'?'on-bad':'')+'" onclick="setAtt(\''+d+'\',\''+r.id+'\',\'bad\')">假</button></div>'
+        +(badS[r.id]?'<input value="'+esc(a.bad[r.id]||'')+'" onchange="setReason(\''+d+'\',\''+r.id+'\',this.value)" placeholder="请假原因" style="margin-top:5px;font-size:12px;padding:4px 6px">':'')+'</div>';
+    }).join('');
+  }
+  window.setAtt=function(d,id,st){var a=getAtt(d);a.ok=a.ok.filter(function(x){return x!==id});a.late=a.late.filter(function(x){return x!==id});delete a.bad[id];if(st==='ok')a.ok.push(id);if(st==='late')a.late.push(id);if(st==='bad')a.bad[id]='';save();draw()};
+  window.setReason=function(d,id,v){getAtt(d).bad[id]=v;save()};
+  $('#attDate').onchange=draw;
+  $('#allOk').onclick=function(){var a=getAtt($('#attDate').value);a.ok=state.roster.map(function(r){return r.id});a.late=[];a.bad={};save();draw();toast('已标记全员出勤')};
+  $('#manageRoster').onclick=openRoster;
+  $('#batchRoster').onclick=openBatchRoster;
+  $('#weeklyPrint').onclick=weeklyAttendancePrint;
+  $('#weeklyWord').onclick=weeklyAttendanceWord;
+  draw();
+}
+function openRoster(){
+  var m=$('#modal');
+  m.innerHTML='<h3>编辑班级名单（'+state.roster.length+'人）</h3>'
+    +'<div class="tip">可直接改名成本班幼儿真名；改名后历史出勤按ID关联，不受影响。</div>'
+    +'<div id="rosterEdit" style="margin-top:10px"></div>'
+    +'<div class="row" style="margin-top:14px"><button class="btn primary" onclick="closeModal()">完成</button></div>';
+  $('#rosterEdit').innerHTML=state.roster.map(function(r){
+    return '<div class="row" style="margin-bottom:6px"><div style="flex:0 0 40px;font-size:12px;color:#8A8076;padding-top:9px">'+(state.roster.indexOf(r)+1)+'</div><input value="'+esc(r.name)+'" onchange="renRoster(\''+r.id+'\',this.value)"></div>';
+  }).join('');
+  $('#modalBg').classList.add('show');
+}
+window.renRoster=function(id,v){var r=state.roster.find(function(x){return x.id===id});if(r){r.name=v;save()}};
+
+/* ============ 批量导入名单 ============ */
+function openBatchRoster(){
+  var m=$('#modal');
+  m.innerHTML='<h3>批量导入幼儿名单</h3>'
+    +'<div class="tip">每行一个姓名（也可用逗号 / 空格 / Tab 分隔）。导入将<strong>替换</strong>当前名单，历史出勤按幼儿ID关联不受影响；只想改个别名字请用「编辑名单」。</div>'
+    +'<textarea id="batchNames" style="min-height:170px" placeholder="张三\n李四\n王五\n……"></textarea>'
+    +'<div class="row" style="margin-top:10px"><label style="margin:0 0 0 2px">或上传名单文件（.txt / .csv）</label><input type="file" id="batchFile" accept=".txt,.csv,text/plain"></div>'
+    +'<div class="row" style="margin-top:14px"><button class="btn primary" id="batchDo">导入名单</button><button class="btn ghost" onclick="closeModal()">取消</button></div>';
+  $('#modalBg').classList.add('show');
+  $('#batchFile').onchange=function(e){var f=e.target.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(){$('#batchNames').value=String(rd.result).replace(/\r/g,'').replace(/[,，\t]+/g,'\n')};rd.readAsText(f)};
+  $('#batchDo').onclick=function(){
+    var names=$('#batchNames').value.split(/[\n,，\t]+/).map(function(s){return s.trim()}).filter(function(s){return s});
+    if(!names.length){toast('请输入或上传名单');return;}
+    if(!confirm('将用 '+names.length+' 名幼儿替换当前名单（'+state.roster.length+' 人）？历史出勤不受影响。'))return;
+    state.roster=names.map(function(n){return {id:uid(),name:n}});save();closeModal();route();toast('已导入 '+names.length+' 名幼儿');
+  };
+}
+
+/* ============ 周出勤表（按周打印 / Word） ============ */
+function weeklyTableHtml(){
+  var mon=monday();var days=[];
+  for(var i=0;i<5;i++){var d=new Date(mon);d.setDate(d.getDate()+i);days.push(fmt(d))}
+  var labels=['周一','周二','周三','周四','周五'];
+  function statusOf(d,r){var a=state.attendance[d];if(!a)return '—';if(a.ok.indexOf(r.id)>=0)return '出勤';if(a.late.indexOf(r.id)>=0)return '迟到';if(a.bad[r.id])return '请假';return '未打卡'}
+  var html='<h2 style="text-align:center;color:#2f6b46;font-family:微软雅黑;margin:0 0 4px">班级周出勤表</h2>'
+    +'<div style="text-align:center;color:#666;font-family:微软雅黑;margin-bottom:12px">'+days[0]+' 至 '+days[4]+'　（班级共 '+state.roster.length+' 人）</div>'
+    +'<table border="1" cellspacing="0" cellpadding="7" style="width:100%;border-collapse:collapse;font-family:微软雅黑;font-size:12pt">'
+    +'<tr style="background:#f3f7f0"><th style="border:1px solid #bbb">幼儿姓名</th>'+days.map(function(d,i){return '<th style="border:1px solid #bbb">'+labels[i]+'<br>'+d.slice(5)+'</th>'}).join('')+'</tr>'
+    +state.roster.map(function(r){return '<tr><td style="border:1px solid #bbb;font-weight:600">'+esc(r.name)+'</td>'+days.map(function(d){return '<td style="border:1px solid #bbb;text-align:center">'+statusOf(d,r)+'</td>'}).join('')+'</tr>'}).join('')
+    +'</table>'
+    +'<div style="margin-top:10px;color:#666;font-family:微软雅黑;font-size:11pt">图例：出勤 / 迟到 / 请假 / 未打卡（—）；请假须注明原因的可在当日「班级出勤」中补填。</div>';
+  return html;
+}
+function weeklyAttendancePrint(){
+  $('#printArea').innerHTML=weeklyTableHtml();
+  document.body.classList.add('print-week');
+  window.print();
+  document.body.classList.remove('print-week');
+  $('#printArea').innerHTML='';
+  toast('已打开周出勤表打印预览');
+}
+function weeklyAttendanceWord(){
+  downloadWord('班级周出勤_'+monday(),[{html:weeklyTableHtml()}]);
+  toast('已导出周出勤表Word');
+}
+
+/* ============ 今日待办 ============ */
+function viewTodo(){
+  $('#app').innerHTML=pageHeader('📝 今日待办','记录每天要做的事，按优先级排序，完成后一键勾掉；可设置日期与优先级。')
+    +'<div class="card"><div class="row">'
+    +'<div style="flex:2"><label>事项</label><input id="todoText" placeholder="例如：给家长发下周活动通知"></div>'
+    +'<div style="flex:0 0 90px"><label>优先级</label><select id="todoPri"><option>高</option><option selected>中</option><option>低</option></select></div>'
+    +'<div style="flex:0 0 130px"><label>日期</label><input type="date" id="todoDate" value="'+today()+'"></div>'
+    +'<div style="flex:0 0 80px"><label>&nbsp;</label><button class="btn primary" id="addTodo">＋ 添加</button></div></div></div>'
+    +'<div id="todoList"></div>';
+  function draw(){
+    var list=state.todos.slice().sort(function(a,b){if(a.done!==b.done)return a.done?1:-1;return a.date<b.date?-1:1});
+    $('#todoList').innerHTML=list.length?list.map(function(tt){
+      var pcls=tt.pri==='高'?'bad':tt.pri==='中'?'warn':'ok';
+      return '<div class="list-item"><div class="hd"><div class="tt" style="text-decoration:'+(tt.done?'line-through':'')+'">'+esc(tt.text)+'</div>'
+        +'<div><span class="pill '+pcls+'">'+tt.pri+'</span> <button class="btn ghost sm" onclick="toggleTodo(\''+tt.id+'\')">'+(tt.done?'↺ 恢复':'✔ 完成')+'</button> <button class="btn danger sm" onclick="delTodo(\''+tt.id+'\')">删</button></div></div>'
+        +'<div class="meta">'+tt.date+'</div></div>';
+    }).join(''):'<div class="empty">暂无待办，添加一条吧～</div>';
+  }
+  $('#addTodo').onclick=function(){var v=$('#todoText').value.trim();if(!v)return;state.todos.push({id:uid(),text:v,done:false,date:$('#todoDate').value,pri:$('#todoPri').value});save();$('#todoText').value='';draw();toast('已添加')};
+  window.toggleTodo=function(id){var x=state.todos.find(function(y){return y.id===id});x.done=!x.done;save();draw()};
+  window.delTodo=function(id){state.todos=state.todos.filter(function(y){return y.id!==id});save();draw()};
+  draw();
+}
+
+/* ============ 幼儿观察快记（AI整理） ============ */
+var DOMAINS={
+  health:{name:'健康',kw:['吃饭','穿衣','如厕','午睡','收拾','独立','整理','洗手','进餐','剪纸','画画','捏','跑','跳','平衡','穿','系','投掷','攀爬','精细','运动','情绪','生气','哭','开心','安抚','焦虑','自信','害怕','委屈','心情','健康','安全','眼睛','牙齿','营养','身体'],interp:'幼儿身心健康是基础。在动作发展与生活自理方面正通过反复练习提升协调性与独立性；情绪上也在学习识别与调节。',strat:'提供安全、可自主的生活与运动机会，用图示步骤与正向鼓励支持其独立完成，并以共情语言帮助情绪安定。'},
+  language:{name:'语言',kw:['表达','讲述','故事','词汇','提问','讨论','描述','儿歌','说话','阅读','绘本','汉字'],interp:'幼儿愿意用语言表征想法，在真实交流情境中语言表达与理解能力持续发展。',strat:'创设丰富的讲述与对话情境，多用开放式提问，鼓励用完整句子表达，耐心倾听并回应。'},
+  social:{name:'社会',kw:['合作','分享','争执','冲突','帮助','同伴','轮流','交友','谦让','规则','社区','职业','家庭','节日','钱币'],interp:'幼儿在同伴互动中展现该年龄段的社会性发展，正学习与人相处、理解与遵守规则。',strat:'提供合作性游戏机会，冲突时以引导协商代替直接介入，帮助建立规则意识与关爱品质。'},
+  science:{name:'科学',kw:['探索','好奇','观察','实验','分类','比较','数','拼搭','搭建','发现','推理','自然','植物','动物','天气','种植','昆虫','形状','测量','规律','科学','秋天','春天','夏天','冬天','树叶','季节'],interp:'幼儿表现出主动探究与动手操作的学习品质，在“做中学”中建构对事物关系与数量的前认知。',strat:'提供有层次、可操作的材料与适度挑战，支持深度探究，鼓励同伴间的发现分享与提问。'},
+  art:{name:'艺术',kw:['画','手工','音乐','舞蹈','美','节奏','泥','折','唱','表演','色彩','颜色'],interp:'幼儿乐于用多种艺术形式表达感受与想象，在创作与表现中发展审美与创造性。',strat:'提供丰富的低结构艺术材料与自由表达空间，重过程轻结果，鼓励大胆尝试与个性化表现。'}
+};
+function detectDomains(text){var keys=Object.keys(DOMAINS);return keys.filter(function(k){return DOMAINS[k].kw.some(function(kw){return text.indexOf(kw)>=0})})}
+function genNote300(o, ds){
+  var name=o.name||'该幼儿';
+  var area=o.area||'区域活动';
+  var kw=o.keywords||'';
+  var dns=ds.map(function(d){return DOMAINS[d].name});
+  var lead=name+'于'+o.date+'在「'+area+'」开展区域活动。本次观察以关键词“'+kw+'”为线索，结合现场照片，幼儿在'+(dns.length?dns.join('、')+'等':('多个'))+'领域表现出发展线索。\n';
+  var body='活动中，'+name+'自主选择材料并投入操作，围绕“'+kw+'”展开持续探索；过程中与同伴、材料积极互动，体现出专注、尝试与表达。'+(o.photoDesc?('照片中可见：'+o.photoDesc+'。'):'（请结合照片补充：幼儿具体做了/说了什么、持续多久。）')+'其行为客观、可观察，反映出在真实情境中学习与发展的特点。\n';
+  var tail='在识别到的'+(dns.length?dns.join('、'):'相关')+'领域方面，幼儿表现与《3-6岁儿童学习与发展指南》的典型行为相呼应。整体来看，'+name+'展现出良好的学习品质与参与状态，教师可聚焦其兴趣延伸与适宜挑战，并在后续同类情境中持续观察。';
+  return lead+body+tail;
+}
+function assembleObs(o){
+  var text=(o.area+' '+o.keywords+' '+(o.photoDesc||''));var ds=detectDomains(text);var dns=ds.map(function(d){return DOMAINS[d].name});
+  var area=o.area||'（请补充观察区域，如：建构区 / 美工区 / 阅读区）';
+  var note=genNote300(o, ds);
+  var interp=ds.length?ds.map(function(d){return '· '+DOMAINS[d].name+'：'+DOMAINS[d].interp}).join('\n'):'（请结合《3-6岁儿童学习与发展指南》相关典型表现，写下你的专业解读）';
+  var strat=ds.length?ds.map(function(d){return '· '+DOMAINS[d].name+'：'+DOMAINS[d].strat}).join('\n'):'（请写下你准备提供的支持策略）';
+  var next='后续可继续在「'+area+'」观察'+(dns.length?('：'+dns.join('、')+'方面的持续表现'):'该幼儿的相关表现')+'，并提供持续支持，择机记录进展。';
+  return {area:area,note:note,language:'（如幼儿有代表性语言，请记录原话，例如：“老师说……，他回应……”或“我发现……”）',interpretation:interp,strategy:strat,next:next};
+}
+function viewObservation(){
+  $('#app').innerHTML=pageHeader('🔍 幼儿观察记录','上传幼儿区域活动照片、输入关键词，系统识别五大领域并生成约 300 字观察笔记；下文可编辑、可导出 Word 或打印。')
+    +'<div class="card"><div class="sec-title">① 输入（幼儿区域活动照片 + 关键词）</div>'
+    +'<div class="row"><div style="flex:0 0 160px"><label>观察对象</label><select id="obName"></select></div>'
+    +'<div style="flex:0 0 150px"><label>日期</label><input type="date" id="obDate" value="'+today()+'"></div></div>'
+    +'<label>观察区域</label><input id="obCtx" placeholder="如：建构区 / 美工区 / 阅读区">'
+    +'<label>幼儿区域活动照片导入（可多张，自动压缩后保存）</label>'
+    +'<input type="file" id="obPhoto" accept="image/*" multiple>'
+    +'<div id="obPhotoPrev" class="att-grid" style="margin-top:8px"></div>'
+    +'<label>关键词 / 简短描述（空格或逗号分隔，如：合作 搭积木 主动帮忙）</label>'
+    +'<textarea id="obKw" placeholder="输入关键词，系统识别五大领域并生成约300字观察笔记"></textarea>'
+    +'<label>画面描述（选填：系统无法读取照片时，请简要说明画面，将融入笔记）</label>'
+    +'<textarea id="obPd" placeholder="如：幼儿在用积木搭高楼，旁边两名同伴在商量分工"></textarea>'
+    +'<div class="row" style="margin-top:10px"><button class="btn primary" id="obGen">🤖 一键生成观察笔记(约300字)</button><button class="btn ghost" id="obClear">清空</button></div>'
+    +'<div class="exp-tip">💡 导出 / 打印请用顶部「本页Word · 本页表格 · 打印」；单条记录可点列表中的「Word」。</div>'
+    +'<div class="sec-title">② 整理后的记录（可编辑）</div>'
+    +'<label>观察区域</label><input id="obR_area">'
+    +'<label>观察笔记（约300字，可自由修改）</label><textarea id="obR_note" style="min-height:180px"></textarea>'
+    +'<label>语言 / 表达记录</label><textarea id="obR_lang"></textarea>'
+    +'<label>行为解读</label><textarea id="obR_int"></textarea>'
+    +'<label>支持策略</label><textarea id="obR_str"></textarea>'
+    +'<label>后续跟进</label><textarea id="obR_next"></textarea>'
+    +'<div id="obDomains" class="tip"></div>'
+    +'<button class="btn primary" id="obSave" style="margin-top:10px">💾 保存观察记录</button></div>'
+    +'<div class="sec-title" style="padding:0 4px">已保存的观察（'+state.observations.length+'）</div><div id="obList"></div>';
+  var obPhotos=[];window._obPhotos=obPhotos;
+  $('#obName').innerHTML=state.roster.map(function(r){return '<option value="'+r.name+'">'+esc(r.name)+'</option>'}).join('');
+  function drawPrev(){$('#obPhotoPrev').innerHTML=obPhotos.map(function(p,i){return '<div class="att-cell"><img class="obp" src="'+p+'" style="width:100%;border-radius:8px"><button class="btn danger sm" style="margin-top:4px;width:100%" onclick="obDelPhoto('+i+')">移除</button></div>'}).join('')}
+  $('#obPhoto').onchange=function(e){var files=Array.prototype.slice.call(e.target.files);files.forEach(function(f){compressImage(f,function(d){obPhotos.push(d);drawPrev()})});$('#obPhoto').value=''};
+  window.obDelPhoto=function(i){obPhotos.splice(i,1);drawPrev()};
+  $('#obGen').onclick=function(){
+    var o={name:$('#obName').value,date:$('#obDate').value,area:$('#obCtx').value,keywords:$('#obKw').value,photoDesc:$('#obPd').value};
+    var ds=detectDomains((o.area+' '+o.keywords+' '+(o.photoDesc||'')));
+    var r=assembleObs(o);
+    $('#obR_area').value=r.area;$('#obR_note').value=r.note;$('#obR_lang').value=r.language;$('#obR_int').value=r.interpretation;$('#obR_str').value=r.strategy;$('#obR_next').value=r.next;
+    $('#obDomains').innerHTML='识别领域（指南五大领域）：'+(ds.length?ds.map(function(d){return '<span class="tag">'+DOMAINS[d].name+'</span>'}).join(''):'<span class="tag">未匹配，请在解读中手动标注</span>')+'　⚠️ 笔记为约300字草稿，请结合照片与现场补充后保存';
+    toast('已生成约300字观察笔记');
+  };
+  $('#obClear').onclick=function(){['obCtx','obKw','obPd','obR_area','obR_note','obR_lang','obR_int','obR_str','obR_next'].forEach(function(id){$('#'+id).value=''});obPhotos.length=0;drawPrev();$('#obDomains').innerHTML=''};
+  function saveRec(){
+    var rec={area:$('#obR_area').value,note:$('#obR_note').value,language:$('#obR_lang').value,interpretation:$('#obR_int').value,strategy:$('#obR_str').value,next:$('#obR_next').value};
+    var ds=detectDomains(($('#obCtx').value+' '+$('#obKw').value));
+    state.observations.unshift({id:uid(),name:$('#obName').value,date:$('#obDate').value,area:$('#obCtx').value,context:$('#obCtx').value,keywords:$('#obKw').value,rec:rec,photos:obPhotos.slice(),domains:ds.map(function(d){return DOMAINS[d].name})});
+    save();
+  }
+  $('#obSave').onclick=function(){if(!$('#obR_note').value.trim()){toast('请先生成或填写笔记');return;}saveRec();toast('已保存');drawList();};
+  function drawList(){
+    $('#obList').innerHTML=state.observations.length?state.observations.map(function(o){
+      var area=(o.area||o.context||'');
+      return '<div class="list-item"><div class="hd"><div class="tt">'+esc(o.name)+' · '+o.date+'</div><div><button class="btn ghost sm" onclick="editOb(\''+o.id+'\')">编辑</button> <button class="btn ghost sm" onclick="obWordOne(\''+o.id+'\')">Word</button> <button class="btn danger sm" onclick="delOb(\''+o.id+'\')">删</button></div></div>'
+        +'<div class="meta">'+esc(area)+' '+((o.domains||[]).map(function(d){return '<span class="tag">'+d+'</span>'}).join(''))+'</div>'
+        +(o.photos&&o.photos.length?'<div style="margin-top:6px">'+o.photos.map(function(p){return '<img class="obp" src="'+p+'" style="max-width:120px;border-radius:8px;margin-right:6px">'}).join('')+'</div>':'')
+        +'<div style="font-size:13px;margin-top:6px;white-space:pre-wrap">'+esc((o.rec.note||o.rec.behavior||''))+'</div></div>';
+    }).join(''):'<div class="empty">还没有观察记录</div>';
+  }
+  window.delOb=function(id){if(confirm('删除这条观察？')){state.observations=state.observations.filter(function(x){return x.id!==id});save();drawList()}};
+  window.obWordOne=function(id){var o=state.observations.find(function(x){return x.id===id});if(o)obExportWord([o],'观察笔记_'+o.name+'_'+o.date)};
+  window.editOb=function(id){var o=state.observations.find(function(x){return x.id===id});if(!o)return;
+    $('#obName').value=o.name;$('#obDate').value=o.date;$('#obCtx').value=(o.area||o.context||'');
+    $('#obKw').value=o.keywords||'';
+    $('#obR_area').value=(o.rec.area||o.rec.situation||o.area||o.context||'');
+    $('#obR_note').value=(o.rec.note||o.rec.behavior||'');
+    $('#obR_lang').value=(o.rec.language||'');
+    $('#obR_int').value=(o.rec.interpretation||'');
+    $('#obR_str').value=(o.rec.strategy||'');
+    $('#obR_next').value=(o.rec.next||'');
+    obPhotos=(o.photos||[]).slice();window._obPhotos=obPhotos;drawPrev();
+    window.scrollTo({top:0,behavior:'smooth'})};
+  drawList();
+}
+
+/* ============ 家园沟通（AI回复） ============ */
+var COMM={
+  emotion:{label:'情绪/适应',build:function(c,d,t){var g=t==='正式'?'尊敬的家长：':'家长朋友，您好！';var soft=t==='温和'?'别着急，这是成长中的正常现象，':'';return g+'\n\n'+(c||'孩子')+'今天在园情绪'+(d||'有些波动')+'。'+soft+'我们会多关注，用稳定的陪伴和游戏帮助他/她慢慢安定下来。也欢迎您在家和我们说说孩子的喜好，方便我们更有针对性地支持。\n\n—— 主班老师'}},
+  health:{label:'受伤/健康',build:function(c,d,t){var g=t==='正式'?'尊敬的家长：':'家长朋友，您好！';return g+'\n\n向您同步一下：'+(c||'孩子')+'今天在园'+(d||'身体不适')+'，我们已'+(t==='简洁'?'及时处理':'第一时间为其处理并持续观察')+'，目前状态平稳。如您接园后发现异常，请随时联系我们，我们一起留意。\n\n—— 主班老师'}},
+  life:{label:'生活环节',build:function(c,d,t){var g=t==='正式'?'尊敬的家长：':'家长朋友，您好！';return g+'\n\n关于'+(c||'孩子')+'今天的'+(d||'进餐/午睡')+'情况：'+(t==='简洁'?'整体不错，继续加油。':'他/她在老师的陪伴下逐步适应，已能愉快参与生活环节。如在家也保持一致的小习惯，会帮助他/她更快独立哦。')+'\n\n—— 主班老师'}},
+  social:{label:'同伴社交',build:function(c,d,t){var g=t==='正式'?'尊敬的家长：':'家长朋友，您好！';return g+'\n\n'+(c||'孩子')+'今天和同伴相处时'+(d||'有了新互动')+'。我们正在通过游戏和引导，帮助他/她学习轮流、分享与表达。您在家也可以多创造和同龄伙伴玩耍的机会，巩固这些宝贵的社会性能力。\n\n—— 主班老师'}},
+  progress:{label:'进步/亮点',build:function(c,d,t){var g=t==='正式'?'尊敬的家长：':'家长朋友，您好！';return g+'\n\n想和您分享一个好消息：'+(c||'孩子')+(d||'今天有了很棒的进步')+'！看到他/她一点点在成长，我们真为你和孩子高兴。这份进步离不开家里的支持，期待继续家园合力，陪伴他/她发光。\n\n—— 主班老师'}},
+  cooperate:{label:'需家长配合',build:function(c,d,t){var g=t==='正式'?'尊敬的家长：':'家长朋友，您好！';var soft=t==='温和'?'辛苦您啦，':'';return g+'\n\n有件事想请'+(c||'您')+'协助：'+(d||'（请填写具体事项，如带一张全家福/准备运动鞋）')+'。'+soft+'您的配合能让班级活动更顺利，也让孩子更有参与感。如有不便随时沟通，谢谢！\n\n—— 主班老师'}},
+  leave:{label:'请假/缺勤',build:function(c,d,t){var g=t==='正式'?'尊敬的家长：':'家长朋友，您好！';return g+'\n\n收到'+(c||'孩子')+(d||'请假')+'的信息，已为您登记。缺勤期间的课程内容我们会在返园后帮孩子补上，您不用担心。祝孩子好好休息，期待他/她元气满满地回来！\n\n—— 主班老师'}},
+  notice:{label:'活动/通知',build:function(c,d,t){var g=t==='正式'?'尊敬的家长：':'家长朋友，您好！';return g+'\n\n温馨提示：'+(d||'（请填写活动/通知内容，如周五亲子运动会）')+'。'+(c?(c+'请留意相关安排。'):'')+'如有疑问欢迎私信，谢谢您的关注与支持！\n\n—— 主班老师'}}
+};
+function viewComm(){
+  $('#app').innerHTML=pageHeader('💬 家园沟通','选择事项类型与语气，自动生成温和、专业的家园沟通回复，可复制发送或保存留档。')
+    +'<div class="card"><div class="row">'
+    +'<div style="flex:1"><label>事项类型</label><select id="cmType">'+Object.keys(COMM).map(function(k){return '<option value="'+k+'">'+COMM[k].label+'</option>'}).join('')+'</select></div>'
+    +'<div style="flex:1"><label>涉及幼儿</label><input id="cmChild" placeholder="幼儿姓名（可不填）"></div>'
+    +'<div style="flex:0 0 120px"><label>语气</label><select id="cmTone"><option value="温和">温和</option><option value="正式">正式</option><option value="简洁">简洁</option></select></div></div>'
+    +'<label>关键信息 / 具体情况</label><textarea id="cmDetail" placeholder="如：午睡时哭了10分钟，后经安抚入睡 / 今天主动帮同伴收玩具"></textarea>'
+    +'<button class="btn primary" id="cmGen" style="margin-top:10px">🤖 生成温和专业回复</button>'
+    +'<label style="margin-top:12px">回复内容（可编辑后复制发送）</label><textarea id="cmReply" style="min-height:140px"></textarea>'
+    +'<div class="row" style="margin-top:8px"><button class="btn" id="cmCopy">📋 复制</button><button class="btn primary" id="cmSave">💾 保存</button><span id="cmMsg" class="copy-ok"></span></div></div>'
+    +'<div class="sec-title" style="padding:0 4px">已保存沟通（'+state.comms.length+'）</div><div id="cmList"></div>';
+  $('#cmGen').onclick=function(){var r=COMM[$('#cmType').value].build($('#cmChild').value.trim(),$('#cmDetail').value.trim(),$('#cmTone').value);$('#cmReply').value=r;toast('已生成回复草稿')};
+  $('#cmCopy').onclick=function(){var t=$('#cmReply').value;if(!t)return;if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){$('#cmMsg').textContent='已复制 ✓';setTimeout(function(){$('#cmMsg').textContent=''},1500)})}else{$('#cmMsg').textContent='请手动复制'}};
+  $('#cmSave').onclick=function(){var reply=$('#cmReply').value.trim();if(!reply)return;state.comms.unshift({id:uid(),type:$('#cmType').value,child:$('#cmChild').value.trim(),detail:$('#cmDetail').value.trim(),tone:$('#cmTone').value,reply:reply,date:today(),status:'待发送'});save();toast('已保存');drawList()};
+  function drawList(){
+    $('#cmList').innerHTML=state.comms.length?state.comms.map(function(c){
+      return '<div class="list-item"><div class="hd"><div class="tt">'+COMM[c.type].label+' · '+(c.child||'通用')+' · '+c.date+'</div><div><button class="btn ghost sm" onclick="cmStatus(\''+c.id+'\')">'+(c.status==='已发送'?'↺ 待发送':'✔ 标记已发送')+'</button> <button class="btn danger sm" onclick="cmDel(\''+c.id+'\')">删</button></div></div>'
+        +'<div style="font-size:13px;margin-top:6px;white-space:pre-wrap">'+esc(c.reply)+'</div></div>';
+    }).join(''):'<div class="empty">还没有保存的沟通</div>';
+  }
+  window.cmDel=function(id){if(confirm('删除这条沟通？')){state.comms=state.comms.filter(function(x){return x.id!==id});save();drawList()}};
+  window.cmStatus=function(id){var c=state.comms.find(function(x){return x.id===id});c.status=c.status==='已发送'?'待发送':'已发送';save();drawList()};
+  drawList();
+}
+
+/* ============ 教案素材库 ============ */
+function viewMaterial(){
+  $('#app').innerHTML=pageHeader('📚 教案素材','收藏可复用的教案素材（标题 / 分类 / 内容），支持搜索，方便备课时随时取用。')
+    +'<div class="card"><div class="row"><div style="flex:2"><label>标题</label><input id="mtTitle" placeholder="如：大班绘本导入提问"></div>'
+    +'<div style="flex:1"><label>分类</label><input id="mtCat" placeholder="绘本/游戏/儿歌/手工"></div></div>'
+    +'<label>内容（可贴素材、话术、链接要点）</label><textarea id="mtContent" placeholder="把可复用的一句话、一个游戏、一段提问存进来"></textarea>'
+    +'<button class="btn primary" id="mtAdd" style="margin-top:10px">＋ 存入素材</button></div>'
+    +'<div class="card"><input id="mtSearch" placeholder="🔎 搜索素材标题/内容" style="margin-bottom:10px"><div id="mtList"></div></div>';
+  function draw(){
+    var q=$('#mtSearch').value.trim();
+    var list=state.materials.filter(function(m){return !q||(m.title+m.content+m.cat).indexOf(q)>=0});
+    $('#mtList').innerHTML=list.length?list.map(function(m){
+      return '<div class="list-item"><div class="hd"><div class="tt">'+esc(m.title)+'</div><div><span class="tag">'+esc(m.cat||'未分类')+'</span> <button class="btn ghost sm" onclick="mtEdit(\''+m.id+'\')">编辑</button> <button class="btn danger sm" onclick="mtDel(\''+m.id+'\')">删</button></div></div>'
+        +'<div style="font-size:13px;margin-top:6px;white-space:pre-wrap">'+esc(m.content)+'</div><div class="meta">'+m.date+'</div></div>';
+    }).join(''):'<div class="empty">没有匹配素材</div>';
+  }
+  $('#mtAdd').onclick=function(){var t=$('#mtTitle').value.trim();var c=$('#mtContent').value.trim();if(!t&&!c)return;state.materials.unshift({id:uid(),title:t,cat:$('#mtCat').value.trim(),content:c,date:today()});save();$('#mtTitle').value='';$('#mtCat').value='';$('#mtContent').value='';toast('已存入');draw()};
+  $('#mtSearch').oninput=draw;
+  window.mtDel=function(id){if(confirm('删除这条素材？')){state.materials=state.materials.filter(function(x){return x.id!==id});save();draw()}};
+  window.mtEdit=function(id){var m=state.materials.find(function(x){return x.id===id});var t=prompt('修改标题：',m.title);if(t===null)return;var c=prompt('修改内容：',m.content);if(c===null)return;m.title=t;m.content=c;save();draw()};
+  draw();
+}
+
+/* ============ AI备课助手 ============ */
+var LESSON_HINTS=[
+  {re:/自然|秋天|春天|夏天|冬天|树叶|植物|动物|天气|季节|种植|昆虫/,dom:'自然探究'},
+  {re:/身体|健康|牙齿|运动|安全|营养|眼睛/,dom:'健康'},
+  {re:/颜色|画|手工|音乐|舞蹈|美|节奏|泥|折/,dom:'艺术'},
+  {re:/超市|买卖|社区|职业|节日|家庭|规则|钱币/,dom:'社会'},
+  {re:/数|形状|分类|测量|逻辑|科学|实验|规律|比较/,dom:'科学认知'},
+  {re:/故事|阅读|儿歌|汉字|表达|绘本|讲述/,dom:'语言'}
+];
+function lessonDomain(theme){for(var i=0;i<LESSON_HINTS.length;i++){if(LESSON_HINTS[i].re.test(theme))return LESSON_HINTS[i]}return {dom:'综合'}}
+function genLesson(opt){
+  var theme=opt.theme;var h=lessonDomain(theme);var dom=h.dom;
+  var mins=Math.max(10,parseInt(opt.duration,10)||30);
+  var intro=Math.max(3,Math.round(mins*0.15));var sum=Math.max(3,Math.round(mins*0.15));var main=mins-intro-sum;
+  var objectives='【活动目标】（基于“'+theme+'”· '+opt.ageGroup+'）\n'
+    +'1. 认知/能力：在围绕“'+theme+'”的情境中，幼儿能'+(opt.goal?opt.goal.replace(/[。.]$/,'')+'，':'主动观察、大胆尝试，')+'并用自己的方式表达发现。\n'
+    +'2. 过程/方法：通过直接感知、实际操作与同伴合作，体验探究/创作/交往的乐趣。\n'
+    +'3. 情感/态度：乐意参与活动，增强自信心与'+(dom==='健康'?'自我保护':dom==='社会'?'规则与关爱':'表达与创造')+'意识。';
+  var materials='【材料清单】\n'
+    +'· 核心材料：'+theme+'相关实物/图片/绘本/视频（1-2种）\n'
+    +'· 操作材料：供幼儿分组操作的低结构材料（如积木、画纸、自然物等）\n'
+    +'· 辅助工具：记录表、记号笔、展示板\n'
+    +'· 环境创设：与“'+theme+'”相关的情境布置或背景音乐';
+  var flow='【活动流程】（总时长约 '+mins+' 分钟）\n'
+    +'一、导入（约 '+intro+' 分钟）\n'
+    +'· 以情境或问题引发兴趣：“关于‘'+theme+'’，你发现了什么？”\n'
+    +'二、展开（约 '+main+' 分钟）\n'
+    +'· 自由探索：幼儿分组操作材料，教师观察并适时追问。\n'
+    +'· 交流分享：请幼儿展示自己的发现/作品，鼓励用完整语言表达。\n'
+    +'· 教师小结提升：点明关键经验，链接生活。\n'
+    +'三、结束（约 '+sum+' 分钟）\n'
+    +'· 回顾今天学到了什么，肯定每位幼儿的参与。\n'
+    +'· 自然过渡到下一个环节，并留下延伸任务。';
+  var questions='【提问话术】（由浅入深）\n'
+    +'1. 感知层：“你看到了什么？它是什么样子的？”\n'
+    +'2. 理解层：“为什么会这样？它们有什么不一样/一样的地方？”\n'
+    +'3. 创造层：“如果是你，你会怎么解决这个问题 / 怎么画？”\n'
+    +'4. 迁移层：“我们在哪里还能见到‘'+theme+'’？回家可以和谁一起试一试？”\n'
+    +'5. '+(opt.ageGroup==='大班'?'挑战层：“你觉得还能有哪些更好的办法？为什么？”':'鼓励层：“你做得真棒，愿意再试一次吗？”');
+  var observation='【观察要点】\n'
+    +'· 参与状态：是否专注投入、主动尝试。\n'
+    +'· '+dom+'发展：在'+dom+'方面的典型表现与个体差异。\n'
+    +'· 语言与社会：能否用语言表达想法、与同伴协商合作。\n'
+    +'· 学习品质：好奇心、坚持性、创造性表现。';
+  return {domain:dom,objectives:objectives,materials:materials,flow:flow,questions:questions,observation:observation};
+}
+function viewLesson(){
+  $('#app').innerHTML=pageHeader('🤖 AI备课助手','输入年龄段、主题、目标与时长，一键生成完整教案（目标 / 材料 / 流程 / 提问 / 观察要点）。')
+    +'<div class="card"><div class="row">'
+    +'<div style="flex:0 0 130px"><label>年龄段</label><select id="lsAge"><option>小班</option><option>中班</option><option selected>大班</option><option>混龄</option></select></div>'
+    +'<div style="flex:1"><label>主题</label><input id="lsTheme" placeholder="如：秋天里的树叶 / 我的身体 / 超市真方便"></div>'
+    +'<div style="flex:0 0 110px"><label>时长(分钟)</label><input id="lsDur" type="number" value="30" min="10"></div></div>'
+    +'<label>活动目标（你的初步想法，可留空由系统补全）</label><textarea id="lsGoal" placeholder="如：认识常见树叶，能按特征分类"></textarea>'
+    +'<button class="btn primary" id="lsGen" style="margin-top:10px">🤖 一键生成教案</button>'
+    +'<div class="sec-title">生成结果（可编辑）</div>'
+    +'<label>活动目标</label><textarea id="lsO"></textarea>'
+    +'<label>材料清单</label><textarea id="lsM"></textarea>'
+    +'<label>活动流程</label><textarea id="lsF" style="min-height:160px"></textarea>'
+    +'<label>提问话术</label><textarea id="lsQ"></textarea>'
+    +'<label>观察要点</label><textarea id="lsP"></textarea>'
+    +'<div class="tip" id="lsDom"></div>'
+    +'<button class="btn primary" id="lsSave" style="margin-top:10px">💾 保存教案</button></div>'
+    +'<div class="sec-title" style="padding:0 4px">已保存教案（'+state.lessons.length+'）</div><div id="lsList"></div>';
+  $('#lsGen').onclick=function(){
+    var theme=$('#lsTheme').value.trim();if(!theme){toast('请先填主题');return;}
+    var out=genLesson({ageGroup:$('#lsAge').value,theme:theme,goal:$('#lsGoal').value.trim(),duration:$('#lsDur').value});
+    $('#lsO').value=out.objectives;$('#lsM').value=out.materials;$('#lsF').value=out.flow;$('#lsQ').value=out.questions;$('#lsP').value=out.observation;
+    $('#lsDom').innerHTML='匹配领域：<span class="tag">'+out.domain+'</span>　⚠️ 生成为结构草稿，请按本班实际调整';toast('已生成教案草稿');
+  };
+  $('#lsSave').onclick=function(){
+    if(!$('#lsTheme').value.trim()){toast('请填主题');return;}
+    state.lessons.unshift({id:uid(),ageGroup:$('#lsAge').value,theme:$('#lsTheme').value.trim(),goal:$('#lsGoal').value.trim(),duration:$('#lsDur').value,out:{objectives:$('#lsO').value,materials:$('#lsM').value,flow:$('#lsF').value,questions:$('#lsQ').value,observation:$('#lsP').value},date:today()});
+    save();toast('已保存');drawList();
+  };
+  function drawList(){
+    $('#lsList').innerHTML=state.lessons.length?state.lessons.map(function(l){
+      return '<div class="list-item"><div class="hd"><div class="tt">'+esc(l.theme)+' · '+l.ageGroup+' · '+l.duration+'分钟</div><div><button class="btn ghost sm" onclick="lsEdit(\''+l.id+'\')">编辑</button> <button class="btn danger sm" onclick="lsDel(\''+l.id+'\')">删</button></div></div>'
+        +'<div style="font-size:13px;margin-top:6px;white-space:pre-wrap">'+esc(l.out.objectives)+'</div></div>';
+    }).join(''):'<div class="empty">还没有保存的教案</div>';
+  }
+  window.lsDel=function(id){if(confirm('删除这条教案？')){state.lessons=state.lessons.filter(function(x){return x.id!==id});save();drawList()}};
+  window.lsEdit=function(id){var l=state.lessons.find(function(x){return x.id===id});if(!l)return;$('#lsAge').value=l.ageGroup;$('#lsTheme').value=l.theme;$('#lsGoal').value=l.goal;$('#lsDur').value=l.duration;$('#lsO').value=l.out.objectives;$('#lsM').value=l.out.materials;$('#lsF').value=l.out.flow;$('#lsQ').value=l.out.questions;$('#lsP').value=l.out.observation;window.scrollTo({top:0,behavior:'smooth'})};
+  drawList();
+}
+
+/* ============ 本周主题 ============ */
+function viewWeekly(){
+  var w=state.weekly;
+  $('#app').innerHTML=pageHeader('🌟 本周主题','设置本周主题名称、说明与总目标，保存后将在首页与各模块同步显示。')
+    +'<div class="card"><div class="row">'
+    +'<div style="flex:2"><label>主题名称</label><input id="wkTitle" value="'+esc(w.title)+'"></div>'
+    +'<div style="flex:1"><label>开始</label><input type="date" id="wkStart" value="'+(w.start||today())+'"></div>'
+    +'<div style="flex:1"><label>结束</label><input type="date" id="wkEnd" value="'+(w.end||'')+'"></div></div>'
+    +'<label>主题说明</label><textarea id="wkDesc">'+esc(w.desc)+'</textarea>'
+    +'<label>本周总目标（每行一条）</label><textarea id="wkGoals">'+esc((w.goals||[]).join('\n'))+'</textarea>'
+    +'<button class="btn primary" id="wkSave" style="margin-top:10px">💾 保存本周主题</button>'
+    +'<div class="tip">保存后首页与各模块会显示当前主题，方便贯穿一周教学。</div></div>';
+  $('#wkSave').onclick=function(){state.weekly={title:$('#wkTitle').value.trim()||'未命名主题',desc:$('#wkDesc').value.trim(),start:$('#wkStart').value,end:$('#wkEnd').value,goals:$('#wkGoals').value.split('\n').map(function(s){return s.trim()}).filter(function(s){return s})};save();toast('已保存，首页已同步')};
+}
+
+/* ============ 备份 / 恢复 ============ */
+function openBackup(){
+  var m=$('#modal');
+  m.innerHTML='<h3>数据备份与恢复</h3>'
+    +'<div class="tip">所有数据保存在<strong>本机浏览器</strong>。建议每周导出一次 JSON 备份，换设备或清缓存前务必备份！</div>'
+    +'<div class="row" style="margin-top:14px"><button class="btn primary" id="bkExport">导出备份(JSON)</button><button class="btn" id="bkImport">导入备份</button></div>'
+    +'<input type="file" id="bkFile" accept="application/json" class="hidden">'
+    +'<hr style="border:none;border-top:1px solid var(--line);margin:16px 0">'
+    +'<button class="btn danger" id="bkReset">⚠️ 清空所有数据（恢复初始示例）</button>'
+    +'<div class="row" style="margin-top:14px"><button class="btn ghost" onclick="closeModal()">关闭</button></div>';
+  $('#modalBg').classList.add('show');
+  $('#bkExport').onclick=function(){var blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='幼儿教师周工作台备份_'+today()+'.json';a.click();toast('已导出备份')};
+  $('#bkImport').onclick=function(){$('#bkFile').click()};
+  $('#bkFile').onchange=function(e){var f=e.target.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(){try{var d=JSON.parse(rd.result);if(confirm('导入将覆盖当前数据，确定？')){state=d;save();location.reload()}}catch(err){alert('文件格式错误')}};rd.readAsText(f)};
+  $('#bkReset').onclick=function(){if(confirm('将清空全部数据并恢复初始示例，确定？')){localStorage.removeItem(DB_KEY);state=defaultState();save();location.reload()}};
+}
+window.closeModal=function(){$('#modalBg').classList.remove('show')};
+$('#modalBg').onclick=function(e){if(e.target===$('#modalBg'))$('#modalBg').classList.remove('show')};
+$('#btnBackup').onclick=openBackup;
+$('#btnWord').onclick=function(){exportCurrentPage('word')};
+$('#btnCsv').onclick=function(){exportCurrentPage('csv')};
+$('#btnPrint').onclick=function(){window.print()};
+$('#btnTheme').onclick=function(){location.hash='#weekly'};
+
+/* ============ 工具 ============ */
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])})}
+
+/* ============ 导出 / 打印（Word · 表格） ============ */
+function downloadBlob(blob,name){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},2000)}
+function buildDoc(title,blocks){
+  var h='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"></head><body>';
+  h+='<h1 style="color:#2f6b46;font-family:微软雅黑">'+esc(title)+'</h1>';
+  blocks.forEach(function(b){
+    if(b.h)h+='<h2 style="color:#8a5a16;font-family:微软雅黑">'+esc(b.h)+'</h2>';
+    if(b.imgs&&b.imgs.length){b.imgs.forEach(function(src){h+='<img src="'+src+'" style="width:3.5cm;height:4.9cm;margin:2px 8px 2px 0;vertical-align:top" alt="观察照片">'});}
+    else if(b.img)h+='<img src="'+b.img+'" style="max-width:360px;display:block;margin:6px 0">';
+    if(b.html)h+=b.html;
+    h+='<p style="white-space:pre-wrap;line-height:1.8;font-family:微软雅黑;font-size:12pt">'+esc(b.body)+'</p>';
+  });
+  h+='</body></html>';
+  return h;
+}
+function downloadWord(title,blocks){downloadBlob(new Blob(['﻿'+buildDoc(title,blocks)],{type:'application/msword'}),title+'.doc')}
+function csvFile(filename,headers,rows){
+  var lines=[headers.map(function(h){return '"'+String(h).replace(/"/g,'""')+'"'}).join(',')];
+  rows.forEach(function(r){lines.push(r.map(function(c){return '"'+String(c==null?'':c).replace(/"/g,'""')+'"'}).join(','))});
+  downloadBlob(new Blob(['﻿'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'}),filename+'.csv');
+}
+function compressImage(file,cb){
+  var rd=new FileReader();
+  rd.onload=function(){
+    var img=new Image();
+    img.onload=function(){
+      var max=1000,w=img.width,h=img.height;
+      if(w>max||h>max){if(w>=h){h=Math.round(h*max/w);w=max}else{w=Math.round(w*max/h);h=max}}
+      var c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);
+      try{cb(c.toDataURL('image/jpeg',0.7))}catch(e){cb(rd.result)}
+    };
+    img.onerror=function(){cb(rd.result)};img.src=rd.result;
+  };
+  rd.readAsDataURL(file);
+}
+function obExportWord(records,filename){
+  var blocks=[];
+  records.forEach(function(o){
+    var area=(o.area||(o.rec&&o.rec.area)||o.context||'');
+    blocks.push({h:o.name+' · '+o.date+(area?(' · '+area):''),
+      body:'【观察笔记】\n'+(o.rec.note||o.rec.behavior||'')+'\n\n【语言/表达】\n'+(o.rec.language||'')+'\n\n【行为解读】\n'+(o.rec.interpretation||'')+'\n\n【支持策略】\n'+(o.rec.strategy||'')+'\n\n【后续跟进】\n'+(o.rec.next||'')});
+    if(o.photos&&o.photos.length)blocks.push({h:'活动照片（'+o.photos.length+' 张 · 统一 2 寸）',imgs:o.photos});
+  });
+  downloadWord(filename,blocks);
+}
+function obExportCsv(records,filename){
+  var headers=['观察对象','日期','观察区域','关键词','识别领域','观察笔记','语言/表达','行为解读','支持策略','后续跟进','照片数'];
+  var rows=records.map(function(o){return [o.name,o.date,(o.area||o.context||''),o.keywords||'',(o.domains||[]).join('、'),o.rec.note||o.rec.behavior||'',o.rec.language||'',o.rec.interpretation||'',o.rec.strategy||'',o.rec.next||'',(o.photos?o.photos.length:0)]});
+  csvFile(filename,headers,rows);
+}
+function exportHomeWord(){var t=today();var a=state.attendance[t];var ok=a?a.ok.length:0;var lt=a?a.late.length:0;var bd=a?Object.keys(a.bad).length:0;
+  downloadWord('工作台概览_'+t,[{h:'今日概览',body:'日期：'+t+'\n未完成待办：'+state.todos.filter(function(x){return !x.done&&x.date<=t}).length+' 条\n今日出勤：'+ok+'/'+state.roster.length+'（迟到'+lt+'，请假'+bd+'）\n本周观察：'+state.observations.filter(function(o){return o.date>=monday()}).length+' 条\n本周主题：'+state.weekly.title}])}
+function exportHomeCsv(){var t=today();var a=state.attendance[t];var ok=a?a.ok.length:0;
+  csvFile('工作台概览_'+t,['项目','数值'],[['日期',t],['未完成待办',state.todos.filter(function(x){return !x.done&&x.date<=t}).length],['今日出勤',ok+'/'+state.roster.length],['本周观察',state.observations.filter(function(o){return o.date>=monday()}).length],['本周主题',state.weekly.title]])}
+function exportScheduleWord(){downloadWord('今日一日流程_'+today(),state.schedule.map(function(s){return {h:s.time,body:s.act+(s.note?('\n备注：'+s.note):'')}}))}
+function exportScheduleCsv(){csvFile('今日一日流程_'+today(),['时间','环节','备注'],state.schedule.map(function(s){return [s.time,s.act,s.note]}))}
+function exportAttendanceWord(){var d=$('#attDate')?$('#attDate').value:today();var a=state.attendance[d]||{ok:[],late:[],bad:{}};
+  var st={};state.roster.forEach(function(r){st[r.id]=a.ok.indexOf(r.id)>=0?'出勤':a.late.indexOf(r.id)>=0?'迟到':a.bad[r.id]?'请假':'未打卡'});
+  var summary='出勤 '+a.ok.length+' 人，迟到 '+a.late.length+' 人，请假 '+Object.keys(a.bad).length+' 人。';
+  var list=state.roster.map(function(r){var s=st[r.id];return '· '+r.name+'：'+s+(s==='请假'&&a.bad[r.id]?('（'+a.bad[r.id]+'）'):'')}).join('\n');
+  downloadWord('班级出勤_'+d,[{h:'出勤概览',body:summary},{h:'幼儿明细',body:list}])}
+function exportAttendanceCsv(){var d=$('#attDate')?$('#attDate').value:today();var a=state.attendance[d]||{ok:[],late:[],bad:{}};
+  csvFile('班级出勤_'+d,['姓名','状态','请假原因'],state.roster.map(function(r){var s=a.ok.indexOf(r.id)>=0?'出勤':a.late.indexOf(r.id)>=0?'迟到':a.bad[r.id]?'请假':'未打卡';return [r.name,s,s==='请假'?a.bad[r.id]:'']}))}
+function exportTodoWord(){var list=state.todos.slice().sort(function(a,b){if(a.done!==b.done)return a.done?1:-1;return a.date<b.date?-1:1});
+  downloadWord('今日待办_'+today(),list.length?list.map(function(t){return {h:(t.done?'✅ ':'⬜ ')+t.pri,body:t.text+'\n日期：'+t.date}}):[{h:'暂无',body:'（没有待办）'}])}
+function exportTodoCsv(){csvFile('今日待办_'+today(),['事项','优先级','日期','状态'],state.todos.map(function(t){return [t.text,t.pri,t.date,t.done?'已完成':'未完成']}))}
+function exportCommWord(){var blocks=state.comms.length?state.comms.map(function(c){return {h:COMM[c.type].label+' · '+(c.child||'通用')+' · '+c.date,body:(c.detail?('【情况】'+c.detail+'\n\n'):'')+c.reply+'\n\n状态：'+c.status}}):[{h:'暂无',body:'（没有保存的沟通）'}];
+  downloadWord('家园沟通_'+today(),blocks)}
+function exportCommCsv(){csvFile('家园沟通_'+today(),['事项类型','涉及幼儿','关键信息','语气','回复内容','日期','状态'],state.comms.map(function(c){return [COMM[c.type].label,c.child||'',c.detail||'',c.tone,c.reply,c.date,c.status]}))}
+function exportMaterialWord(){var blocks=state.materials.length?state.materials.map(function(m){return {h:m.title+' 〔'+(m.cat||'未分类')+'〕',body:m.content+'\n日期：'+m.date}}):[{h:'暂无',body:'（没有素材）'}];
+  downloadWord('教案素材_'+today(),blocks)}
+function exportMaterialCsv(){csvFile('教案素材_'+today(),['标题','分类','内容','日期'],state.materials.map(function(m){return [m.title,m.cat||'',m.content,m.date]}))}
+function exportLessonWord(){var blocks=state.lessons.length?state.lessons.map(function(l){return {h:l.theme+' · '+l.ageGroup+' · '+l.duration+'分钟',body:[l.out.objectives,l.out.materials,l.out.flow,l.out.questions,l.out.observation].join('\n\n')}}):[{h:'暂无',body:'（没有保存的教案）'}];
+  downloadWord('AI备课_'+today(),blocks)}
+function exportLessonCsv(){csvFile('AI备课_'+today(),['主题','年龄段','时长(分)','活动目标','材料清单','活动流程','提问话术','观察要点','日期'],state.lessons.map(function(l){return [l.theme,l.ageGroup,l.duration,l.out.objectives,l.out.materials,l.out.flow,l.out.questions,l.out.observation,l.date]}))}
+function exportWeeklyWord(){var w=state.weekly;downloadWord('本周主题_'+(w.title||''),[{h:w.title||'未命名',body:(w.start||'')+(w.end?(' 至 '+w.end):'')+'\n\n【主题说明】\n'+(w.desc||'')+'\n\n【本周总目标】\n'+(w.goals||[]).join('\n')}])}
+function exportWeeklyCsv(){var w=state.weekly;csvFile('本周主题_'+(w.title||'未命名'),['项目','内容'],[['主题名称',w.title],['起止',(w.start||'')+(w.end?(' 至 '+w.end):'')],['主题说明',w.desc],['总目标',(w.goals||[]).join('；')]])}
+function exportObservation(){
+  var name=$('#obName')?$('#obName').value:'';var date=$('#obDate')?$('#obDate').value:today();
+  var area=$('#obR_area')?$('#obR_area').value:(($('#obCtx')?$('#obCtx').value:''));
+  var note=$('#obR_note')?$('#obR_note').value:'';var kw=$('#obKw')?$('#obKw').value:'';
+  if(note.trim()){
+    var rec={name:name,date:date,area:area,keywords:kw,rec:{area:area,note:note,language:$('#obR_lang')?$('#obR_lang').value:'',interpretation:$('#obR_int')?$('#obR_int').value:'',strategy:$('#obR_str')?$('#obR_str').value:'',next:$('#obR_next')?$('#obR_next').value:''},photos:(window._obPhotos||[]),domains:[]};
+    return rec;
+  }
+  return null;
+}
+function exportCurrentPage(format){
+  var h=location.hash.replace('#','')||'home';
+  if(h==='home'){format==='word'?exportHomeWord():exportHomeCsv();toast('已导出'+ (format==='word'?'Word':'表格'))}
+  else if(h==='schedule'){format==='word'?exportScheduleWord():exportScheduleCsv();toast('已导出'+ (format==='word'?'Word':'表格'))}
+  else if(h==='attendance'){format==='word'?exportAttendanceWord():exportAttendanceCsv();toast('已导出'+ (format==='word'?'Word':'表格'))}
+  else if(h==='todo'){format==='word'?exportTodoWord():exportTodoCsv();toast('已导出'+ (format==='word'?'Word':'表格'))}
+  else if(h==='observation'){
+    var cur=exportObservation();
+    if(cur){format==='word'?obExportWord([cur],'观察笔记_'+cur.name+'_'+cur.date):obExportCsv([cur],'观察笔记_'+cur.name+'_'+cur.date);toast('已导出本文'+ (format==='word'?'Word':'表格'))}
+    else if(state.observations.length){format==='word'?obExportWord(state.observations,'全部观察记录_'+today()):obExportCsv(state.observations,'全部观察记录_'+today());toast('已导出全部'+ (format==='word'?'Word':'表格'))}
+    else{toast('请先生成或填写笔记')}
+  }
+  else if(h==='comm'){format==='word'?exportCommWord():exportCommCsv();toast('已导出'+ (format==='word'?'Word':'表格'))}
+  else if(h==='material'){format==='word'?exportMaterialWord():exportMaterialCsv();toast('已导出'+ (format==='word'?'Word':'表格'))}
+  else if(h==='lesson'){format==='word'?exportLessonWord():exportLessonCsv();toast('已导出'+ (format==='word'?'Word':'表格'))}
+  else if(h==='weekly'){format==='word'?exportWeeklyWord():exportWeeklyCsv();toast('已导出'+ (format==='word'?'Word':'表格'))}
+}
+
+/* ============ 启动 ============ */
+route();
+</script>
+</body>
+</html>
